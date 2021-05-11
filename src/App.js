@@ -3,53 +3,39 @@ import './App.css';
 import abi from './abi/abi.json'
 import { ethers } from 'ethers';
 
+let addresses = [];
 const getEvents = async () => {
   const contractAddress = "0x60B1A1EB0374861FE79CE946726dB1ffe2b6eC54";
   const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const contract = new ethers.Contract(contractAddress, abi, provider.getSigner(0));
+  const currentBlock = await provider.getBlockNumber();
+  // const contract = new ethers.Contract(contractAddress, abi, provider.getSigner(0));
 
-  let logInfo = {
-    address: '0x60B1A1EB0374861FE79CE946726dB1ffe2b6eC54',
-    fromBlock: 1425845,
-    toBlock: 1426357
+  for(let i = 1426357; i < currentBlock; i += 512){    
+      let logInfo = {
+        address: '0x60B1A1EB0374861FE79CE946726dB1ffe2b6eC54',
+        fromBlock: i - 512,
+        toBlock: i
+      }
+    
+      provider.getLogs(logInfo)
+      .then(logs => {
+          logs.forEach(log => addresses.push(log.topics[1]));
+      })
   }
-
-  provider.getLogs(logInfo)
-  .then(logs => {
-      console.log(logs);
-      logs.forEach(log => console.log(log.topics[1]))
-      // let events = logs.map(log => contract.interface.parseLog(log));
-      // console.log(events);
-  })
 }
 
+getEvents();
+
 function App() {
-  getEvents();
+  console.log(addresses);
+  const addressList = addresses.map((address) => <li>{address}</li>)
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        {addressList}
       </header>
     </div>
   );
 }
 
 export default App;
-
-  // let eventFilter = contract.filters.Deposit();
-  // let events = await contract.queryFilter(eventFilter, -100);
-
-  // console.log(events);  
-  // console.log(contract);
-  // await contract.getTransactionCount(true, true).then(count => console.log(count.toString()));
