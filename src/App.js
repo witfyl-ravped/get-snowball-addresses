@@ -4,16 +4,23 @@ import abi from './abi/abi.json'
 import { ethers } from 'ethers';
 
 const getEvents = async () => {
-
+  const contractAddress = "0x60B1A1EB0374861FE79CE946726dB1ffe2b6eC54";
   const provider = new ethers.providers.Web3Provider(window.ethereum);
+  const contract = new ethers.Contract(contractAddress, abi, provider.getSigner(0));
 
   let logInfo = {
     address: '0x60B1A1EB0374861FE79CE946726dB1ffe2b6eC54',
-    fromBlock: 1654739,
-    toBlock: 1654739
+    fromBlock: 1425845,
+    toBlock: 1426357
   }
 
-  provider.getLogs(logInfo).then((res) => console.log(res))
+  provider.getLogs(logInfo)
+  .then(logs => {
+      console.log(logs);
+      logs.forEach(log => console.log(log.topics[1]))
+      // let events = logs.map(log => contract.interface.parseLog(log));
+      // console.log(events);
+  })
 }
 
 function App() {
@@ -40,9 +47,6 @@ function App() {
 
 export default App;
 
-  // const contractAddress = "0x60B1A1EB0374861FE79CE946726dB1ffe2b6eC54";
-
-  // const contract = new ethers.Contract(contractAddress, abi, provider.getSigner(0));
   // let eventFilter = contract.filters.Deposit();
   // let events = await contract.queryFilter(eventFilter, -100);
 
